@@ -116,7 +116,7 @@ services:
     restart: unless-stopped
   
   greenplum:
-    image: tubo/greenplum
+    image: inrgihc/greenplum:7.0.0
     container_name: greenplum
     ports:
       - "15432:5432"
