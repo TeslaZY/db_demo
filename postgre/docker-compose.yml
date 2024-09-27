@@ -1,0 +1,9 @@
+services:
+  postgre:
+    image: postgres
+    container_name: postgre
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: ilvTD123
+    restart: unless-stopped

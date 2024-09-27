@@ -1,5 +1,3 @@
-version: "1"
-
 services:
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop2.7.4-java8
@@ -13,7 +11,8 @@ services:
     ports:
       - "50070:50070"
     networks:
-      - tubo-database-net
+      - tubo-database-networks
+    restart: unless-stopped
   
   datanode:
     image: bde2020/hadoop-datanode:2.0.0-hadoop2.7.4-java8
@@ -27,7 +26,8 @@ services:
     ports:
       - "50075:50075"
     networks:
-      - tubo-database-net
+      - tubo-database-networks
+    restart: unless-stopped
   
   hive-server:
     image: bde2020/hive:2.3.2-postgresql-metastore
@@ -40,7 +40,8 @@ services:
     ports:
       - "10000:10000"
     networks:
-      - tubo-database-net
+      - tubo-database-networks
+    restart: unless-stopped
   
   hive-metastore:
     image: bde2020/hive:2.3.2-postgresql-metastore
@@ -53,7 +54,8 @@ services:
     ports:
       - "59083:9083"
     networks:
-      - tubo-database-net
+      - tubo-database-networks
+    restart: unless-stopped
   
   hive-metastore-postgresql:
     image: bde2020/hive-metastore-postgresql:2.3.0
@@ -61,7 +63,9 @@ services:
     ports:
       - "25432:5432"
     networks:
-      - tubo-database-net
+      - tubo-database-networks
+    restart: unless-stopped
+
   presto:
     image: prestodb/presto:latest  
     container_name: presto
@@ -75,18 +79,117 @@ services:
       - ./presto/tpch.properties:/opt/presto-server/etc/catalog/tpch.properties
       - ./presto/hive.properties:/opt/presto-server/etc/catalog/hive.properties
     networks:
-      - tubo-database-net
+      - tubo-database-networks
+    restart: unless-stopped
+
+  trino:
+    image: trinodb/trino
+    container_name: trino
+    ports:
+      - "38080:8080"
+    volumes:
+      - ./trino/tpcds.properties:/etc/trino/catalog/tpcds.properties
+      - ./trino/tpch.properties:/etc/trino/catalog/tpch.properties
+    networks:
+      - tubo-database-networks
+    restart: unless-stopped
+
+  doris:
+    image: apache/doris:doris-all-in-one-2.1.0
+    container_name: doris
+    networks:
+      - tubo-database-networks
+    ports:
+      - "19030:9030"
+      - "18030:8030"
+    restart: unless-stopped
+  
+  starrocks:
+    image: starrocks/allin1-ubuntu
+    container_name: starrocks
+    ports:
+      - "9030:9030"
+      - "8030:8030"
+      - "8040:8040"
+    networks:
+      - tubo-database-networks
+    restart: unless-stopped
+  
+  greenplum:
+    image: inrgihc/greenplum:7.0.0
+    container_name: greenplum
+    ports:
+      - "15432:5432"
+    networks:
+      - tubo-database-networks
+    restart: unless-stopped
+
+  clickhouse-server:
+    image: clickhouse/clickhouse-server
+    container_name: clickhouse-server
+    ports:
+      - "8123:8123"
+      - "3500:9000"
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    environment:
+      CLICKHOUSE_DB: default
+      CLICKHOUSE_USER: root
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+      TZ: Asia/Shanghai
+      CLICKHOUSE_PASSWORD: password123
+    volumes:
+      - /var/local/apps/clickhouse/data:/var/lib/clickhouse
+    networks:
+      - tubo-database-networks
+    restart: unless-stopped
+
+  postgre:
+    image: tubo/postgre
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: ilvTD123
+    networks:
+      - tubo-database-networks
+    restart: unless-stopped
+  
+  sqlserver:
+    image: tubo/sqlserver
+    container_name: sqlserver
+    hostname: sqlserver
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ilvTD123
+    networks:
+      - tubo-database-networks
+    restart: unless-stopped
+
+  oracle:
+    image: tubo/oracle:latest
+    container_name: oracle
+    ports:
+      - "1521:1521"
+    networks:
+      - tubo-database-networks
+    restart: unless-stopped
 
 volumes:
   hive-namenode:
     name: hive-namenode
   hive-datanode:
     name: hive-datanode
-  
 
 networks:
-  tubo-database-net:
+  tubo-database-networks:
     driver: bridge
-    name: tubo-database-net
-    external: true
-    
+    name: tubo-database-networks
+    ipam:
+      config:
+        - subnet: 172.21.0.0/24 
+          gateway: 172.21.0.1

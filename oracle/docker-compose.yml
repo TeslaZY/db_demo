@@ -1,0 +1,14 @@
+services:
+  oracle:
+    image: container-registry.oracle.com/database/free:latest
+    container_name: oracle_base
+    ports:
+      - "11521:1521"
+    environment:
+      ORACLE_PWD: ilvTD123
+      ENABLE_ARCHIVELOG: "true"
+      ENABLE_FORCE_LOGGING: "true"
+      ORACLE_SCRIPTS_DIR: /docker-entrypoint-initdb.d
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
