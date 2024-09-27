@@ -126,7 +126,7 @@ services:
 
   clickhouse-server:
     image: clickhouse/clickhouse-server
-    container_name: clickhouse-server
+    container_name: clickhouse
     ports:
       - "8123:8123"
       - "3500:9000"
@@ -140,19 +140,19 @@ services:
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
       TZ: Asia/Shanghai
       CLICKHOUSE_PASSWORD: password123
-    volumes:
-      - /var/local/apps/clickhouse/data:/var/lib/clickhouse
     networks:
       - tubo-database-networks
     restart: unless-stopped
 
   postgre:
-    image: tubo/postgre
+    image: postgres
     container_name: postgres
     ports:
       - "5432:5432"
     environment:
       POSTGRES_PASSWORD: ilvTD123
+    volumes:
+      - ./postgre/data:/var/lib/postgresql/data
     networks:
       - tubo-database-networks
     restart: unless-stopped
