@@ -124,7 +124,7 @@ services:
       - tubo-database-networks
     restart: unless-stopped
 
-  clickhouse-server:
+  clickhouse:
     image: clickhouse/clickhouse-server
     container_name: clickhouse
     ports:
@@ -140,6 +140,8 @@ services:
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
       TZ: Asia/Shanghai
       CLICKHOUSE_PASSWORD: password123
+    volumes:
+      - ./clickhouse/data:/var/lib/clickhouse
     networks:
       - tubo-database-networks
     restart: unless-stopped
